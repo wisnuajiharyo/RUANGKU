@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RUANGKU - Kapanewon Depok</title>
+  <!-- Tailwind CSS v4 via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <!-- FullCalendar Core & Plugins via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+  <!-- Bahasa Indonesia untuk FullCalendar -->
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/id.global.min.js"></script>
+  <style>
+    .fc { max-width: 100%; margin: 0 auto; --fc-border-color: #e5e7eb; }
+    .fc-event { cursor: pointer; transition: transform 0.1s; }
+    .fc-event:hover { transform: scale(1.01); }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased font-sans relative">
+
+  <!-- TOAST NOTIFICATION (POP-UP MENGAMBANG MODERN) -->
+  <div id="toast-notif" class="hidden fixed top-6 left-1/2 transform -translate-x-1/2 z-[200] transition-all duration-300 opacity-0 -translate-y-5 w-11/12 max-w-sm">
+    <div id="toast-content" class="flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl text-sm font-bold">
+      <!-- Icon & Text injected by JS -->
+    </div>
+  </div>
+
+  <!-- Navigation Header -->
+  <header class="bg-indigo-700 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div>
+        <h1 class="text-xl font-bold tracking-wide">Sistem Aplikasi Peminjaman Ruangan dan Tempat (RUANGKU)</h1>
+        <p class="text-indigo-200 text-xs">Subbagian Umum dan Kepegawaian Kapanewon Depok</p>
+      </div>
+      <nav class="flex space-x-1 bg-indigo-800 p-1 rounded-xl overflow-x-auto w-full md:w-auto">
+        <button onclick="switchTab('sop')" id="tab-sop" class="tab-btn px-3 py-2 text-xs font-medium rounded-lg bg-white text-indigo-700 shadow-sm whitespace-nowrap cursor-pointer">Fasilitas</button>
+        <button onclick="switchTab('kalender')" id="tab-kalender" class="tab-btn px-3 py-2 text-xs font-medium rounded-lg text-indigo-100 hover:text-white whitespace-nowrap cursor-pointer">Kalender</button>
+        <button onclick="switchTab('form')" id="tab-form" class="tab-btn px-3 py-2 text-xs font-medium rounded-lg text-indigo-100 hover:text-white whitespace-nowrap cursor-pointer">Formulir Pinjam</button>
+        <button onclick="switchTab('edit')" id="tab-edit" class="tab-btn px-3 py-2 text-xs font-medium rounded-lg text-indigo-100 hover:text-white whitespace-nowrap cursor-pointer">Cek Status & Edit</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    
+    <!-- PANEL 1: FASILITAS -->
+    <div id="content-sop" class="tab-content space-y-8">
+      
+      <!-- INFOGRAFIS PANDUAN CARA PINJAM (RESPONSIF: GESER DI HP, JEJER DI LAPTOP) -->
+      <div class="mb-8">
+        <!-- Flex untuk HP (Geser), Grid 2 Kolom untuk PC (Jejer Sebelahan) -->
+        <div class="flex md:grid md:grid-cols-2 gap-4 md:gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          
+          <!-- Gambar 1 -->
+          <div class="snap-center shrink-0 w-[85%] md:w-full mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex justify-center hover:shadow-md transition-all">
+            <img src="https://drive.google.com/thumbnail?id=1SP-2DyujMbuvhCZfAbd3yzJx6QuwbJ_X&sz=w1080" alt="Panduan Bagian 1" class="w-full h-auto object-contain">
+          </div>
+
+          <!-- Gambar 2 -->
+          <div class="snap-center shrink-0 w-[85%] md:w-full mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex justify-center hover:shadow-md transition-all">
+            <img src="https://drive.google.com/thumbnail?id=18YUKlM_MPNJAPsNjyJ5NFJVCSH7i87KM&sz=w1080" alt="Panduan Bagian 2" class="w-full h-auto object-contain">
+          </div>
+
+        </div>
+        
+        <!-- Petunjuk Geser (Hanya Muncul di Layar HP, Sembunyi di PC) -->
+        <div class="text-center mt-3 md:hidden">
+          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full animate-pulse border border-indigo-100">
+            Geser ke samping <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
+          </span>
+        </div>
+      </div>
+        
+      <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-100">
+        <h2 class="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+          <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1 1 0 0113 3.414l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          Ketentuan Peminjaman Tempat
+        </h2>
+        <div class="space-y-6">
+          <div class="bg-indigo-50/50 p-5 rounded-xl border border-indigo-100">
+            <h3 class="font-bold text-indigo-800 mb-3 text-sm uppercase tracking-wider">A. Prosedur Pengajuan</h3>
+            <ol class="list-decimal list-inside space-y-2.5 text-sm text-slate-700 leading-relaxed">
+              <li>Pemohon wajib memantau ketersediaan tempat melalui menu <strong class="text-indigo-600 cursor-pointer hover:underline" onclick="switchTab('kalender')">Kalender Agenda</strong>.</li>
+              <li>Pengisian formulir dilakukan paling lambat <span class="font-bold text-slate-900">H-3 sebelum pelaksanaan acara</span>.</li>
+              <li>Setelah mengirim data, petugas Subbagian Umum dan Kepegawaian akan melakukan validasi agenda kedinasan intern kapanewon.</li>
+              <li>Apabila disetujui, warna agenda di kalender akan berubah menjadi <span class="text-emerald-600 font-bold">Hijau</span>. Jika masih <span class="text-amber-500 font-bold">Kuning (Pending)</span>, proses verifikasi sedang berjalan.</li>
+            </ol>
+          </div>
+          <div class="p-5">
+            <h3 class="font-bold text-slate-800 mb-3 text-sm uppercase tracking-wider">B. Tata Tertib Penggunaan</h3>
+            <ol class="list-decimal list-inside space-y-2.5 text-sm text-slate-700 leading-relaxed">
+              <li>Tempat hanya digunakan sesuai tujuan yang tercantum dalam permohonan pengajuan.</li>
+              <li>Dilarang menggunakan tempat untuk kegiatan yang bertentangan dengan peraturan perundang-undangan.</li>
+              <li>Peminjam wajib menjaga kebersihan, keamanan, dan ketertiban area Kapanewon Depok.</li>
+              <li>Peminjam bertanggung jawab penuh atas kerusakan fasilitas/sarana prasarana selama masa penggunaan.</li>
+              <li>Baterai untuk mic/audio <strong>tidak difasilitasi</strong> oleh kapanewon dan dipersilakan membawa sendiri <span class="text-indigo-600 font-semibold">(menggunakan tipe AA)</span>.</li>
+              <li><span class="text-red-600 font-semibold">Kapanewon berhak membatalkan izin</span> apabila tempat secara mendadak diperlukan untuk kepentingan kedinasan yang mendesak.</li>
+            </ol>
+          </div>
+          
+          <div class="mt-2 p-4 bg-red-50 rounded-xl text-red-800 border border-red-200 font-medium text-sm flex items-start gap-3 shadow-sm">
+            <span class="text-lg">🚨</span>
+            <div class="space-y-1">
+              <p><strong>Pembatalan/Cancel Booking:</strong></p>
+              <ul class="list-disc list-inside text-red-700 text-xs mt-1 space-y-1">
+                <li>Untuk <span class="text-red-700 font-semibold">pembatalan</span> pengajuan berstatus <span class="bg-amber-200 text-amber-900 px-1 rounded font-bold">Pending</span>, pembatalan dapat dilakukan mandiri melalui menu <strong>Cek Status & Edit</strong>.</li>
+                <li>Untuk pembatalan jadwal yang sudah <span class="bg-emerald-200 text-emerald-900 px-1 rounded font-bold">Disetujui</span>, wajib lapor ke Admin Sekretariat via WA <strong>085117104040</strong> (Teks/Chat) untuk dilakukan pembatalan sistem.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h2 class="text-lg font-bold text-slate-900 mb-4">Informasi Sarpras & Kapasitas Tempat</h2>
+        <div id="ruangan-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      </div>
+    </div>
+
+    <!-- PANEL 2: KALENDER -->
+    <div id="content-kalender" class="tab-content hidden">
+      <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-100">
+        <div class="flex gap-4 text-xs font-medium mb-4 justify-end">
+          <span class="flex items-center gap-1"><span class="w-3 h-3 bg-amber-400 block rounded-xs"></span> Pending</span>
+          <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 block rounded-xs"></span> Disetujui</span>
+        </div>
+        <div id="calendar"></div>
+      </div>
+    </div>
+
+    <!-- PANEL 3: FORMULIR PINJAM -->
+    <div id="content-form" class="tab-content hidden max-w-xl mx-auto">
+      <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-100">
+        <h2 class="text-lg font-bold text-slate-900 mb-4">Formulir Pinjam Ruangan & Tempat</h2>
+        <form id="bookingForm" onsubmit="handleFormSubmit(event)" class="space-y-4 text-sm">
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-medium mb-1">Nama Penanggung Jawab</label>
+              <input type="text" name="nama" required class="w-full rounded-lg border border-slate-300 p-2 outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Nomor WA Aktif</label>
+              <input type="tel" name="kontak" placeholder="08xxxxxxxxxx" pattern="^(08|628|\+628)[0-9]{8,12}$" title="Gunakan format 08... atau 628... (10-14 digit)" required class="w-full rounded-lg border border-slate-300 p-2 outline-none focus:border-indigo-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1">Asal Instansi</label>
+            <select name="instansi" id="instansi" onchange="toggleInstansi()" required class="w-full rounded-lg border border-slate-300 p-2 outline-none focus:border-indigo-500 bg-white">
+              <option value="">-- Pilih --</option>
+              <option value="Kapanewon Depok">Internal Kapanewon Depok</option>
+              <option value="Lainnya">Instansi Luar / Lainnya</option>
+            </select>
+          </div>
+
+          <div id="div-internal" class="hidden p-4 bg-slate-50 border border-slate-200 rounded-lg">
+            <label class="block font-medium mb-1">Pengampu Acara (Jawatan / Subbagian) <span class="text-red-500 font-bold">*</span></label>
+            <select id="internalPengampu" name="internalPengampu" class="w-full rounded-lg border border-slate-300 p-2 outline-none focus:border-indigo-500 bg-white">
+              <option value="">-- Pilih Jawatan / Subbagian --</option>
+              <option value="Jawatan Umum">Jawatan Umum</option>
+              <option value="Jawatan Keamanan">Jawatan Keamanan</option>
+              <option value="Jawatan Kemakmuran">Jawatan Kemakmuran</option>
+              <option value="Jawatan Praja">Jawatan Praja</option>
+              <option value="Jawatan Sosial">Jawatan Sosial</option>
+              <option value="Subbagian Umum dan Kepegawaian (Umpeg)">Subbagian Umum dan Kepegawaian (Umpeg)</option>
+              <option value="Subbagian Keuangan, Perencanaan dan Evaluasi (KPE)">Subbagian Keuangan, Perencanaan dan Evaluasi (KPE)</option>
+            </select>
+          </div>
+
+          <div id="div-plainnya" class="hidden space-y-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+            <div>
+              <label class="block font-medium mb-1">Alamat / Nama Instansi Luar</label>
+              <input type="text" id="instansiLainnya" name="instansiLainnya" class="w-full rounded-lg border border-slate-300 p-2 outline-none">
+            </div>
+            <div>
+              <label id="label-surat" class="block font-medium mb-1">Upload Surat Permohonan (PDF/Gambar)</label>
+              <input type="file" id="suratFile" accept=".pdf,image/png,image/jpeg" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="sm:col-span-2">
+              <label class="block font-medium mb-1">Pilih Tempat</label>
+              <select name="ruangan" id="form-ruangan-select" required class="w-full rounded-lg border border-slate-300 p-2 bg-white"></select>
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Jumlah Peserta</label>
+              <input type="number" name="jumlahPeserta" id="input-peserta" min="1" required placeholder="Orang" class="w-full rounded-lg border border-slate-300 p-2 outline-none focus:border-indigo-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1">Nama Kegiatan</label>
+            <input type="text" name="kegiatan" required class="w-full rounded-lg border border-slate-300 p-2">
+          </div>
+
+          <div class="border border-indigo-100 p-4 rounded-xl bg-slate-50 shadow-inner">
+            <div class="flex justify-between items-center mb-3 border-b pb-2">
+              <label class="font-bold text-indigo-800">Waktu Pelaksanaan</label>
+              <button type="button" onclick="tambahJadwal()" class="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-md font-semibold hover:bg-indigo-700 cursor-pointer transition">+ Tambah Hari</button>
+            </div>
+            
+            <div id="jadwal-container" class="space-y-4">
+              <div class="jadwal-item grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                <div class="sm:col-span-5">
+                  <label class="block text-xs font-medium text-slate-600 mb-1">Tanggal</label>
+                  <input type="date" name="tanggal[]" required class="input-tgl w-full rounded-lg border border-slate-300 p-2 outline-none focus:border-indigo-500">
+                </div>
+                <div class="sm:col-span-3">
+                  <label class="block text-xs font-medium text-slate-600 mb-1">Mulai</label>
+                  <input type="time" name="jamMulai[]" required class="w-full rounded-lg border border-slate-300 p-2 outline-none focus:border-indigo-500">
+                </div>
+                <div class="sm:col-span-3">
+                  <label class="block text-xs font-medium text-slate-600 mb-1">Selesai</label>
+                  <input type="time" name="jamSelesai[]" required class="w-full rounded-lg border border-slate-300 p-2 outline-none focus:border-indigo-500">
+                </div>
+                <div class="sm:col-span-1 text-right sm:text-center mt-2 sm:mt-0">
+                  <button type="button" onclick="hapusJadwal(this)" class="btn-hapus-jadwal p-2 rounded-lg text-slate-400 cursor-not-allowed opacity-50" title="Hapus jadwal" disabled>
+                    <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="form-message" class="hidden p-3 rounded-lg text-xs font-medium text-center transition-all"></div>
+          <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg flex items-center justify-center transition cursor-pointer">Kirim Permohonan</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- PANEL 4: CEK STATUS DAN TRACKING -->
+    <div id="content-edit" class="tab-content hidden max-w-xl mx-auto space-y-6">
+      <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-100">
+        <h2 class="text-lg font-bold text-slate-900 mb-2">Lacak Status & Riwayat Jadwal</h2>
+        <p class="text-xs text-slate-500 mb-4">Masukkan nomor WA pendaftaran untuk memantau status atau membatalkan pengajuan yang masih berstatus Pending.</p>
+        <div class="flex gap-2">
+          <input type="tel" id="cariWa" placeholder="08xxxxxxxxxx" class="flex-1 rounded-lg border border-slate-300 p-2 text-sm outline-none">
+          <button onclick="lacakStatusJadwal()" id="btnCari" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center justify-center transition cursor-pointer">Cari</button>
+        </div>
+        <div id="hasil-cari" class="mt-4 space-y-3"></div>
+      </div>
+
+      <div id="form-edit-container" class="hidden bg-white p-6 rounded-2xl border border-indigo-200 shadow-lg transition-all">
+        <h3 class="font-bold text-indigo-700 border-b pb-2 mb-4">Edit Jadwal Harian</h3>
+        <form id="editForm" onsubmit="handleEditSubmit(event)" class="space-y-4 text-sm">
+          <input type="hidden" id="editRow">
+          <div><label class="block font-medium mb-1">Ubah Tempat</label><select id="editRuangan" required class="w-full rounded-lg border p-2 bg-white"></select></div>
+          <div><label class="block font-medium mb-1">Nama Kegiatan</label><input type="text" id="editKegiatan" required class="w-full rounded-lg border p-2"></div>
+          <div><label class="block font-medium mb-1">Tanggal</label><input type="date" id="editTanggal" required class="w-full rounded-lg border p-2"></div>
+          <div class="grid grid-cols-2 gap-4">
+            <div><label class="block font-medium mb-1">Mulai</label><input type="time" id="editMulai" required class="w-full rounded-lg border p-2"></div>
+            <div><label class="block font-medium mb-1">Selesai</label><input type="time" id="editSelesai" required class="w-full rounded-lg border p-2"></div>
+          </div>
+          <div id="edit-message" class="hidden p-2 rounded text-xs text-center transition-all"></div>
+          <div class="flex gap-2">
+            <button type="button" onclick="batalEdit()" class="flex-1 bg-slate-200 text-slate-800 py-2 rounded-lg font-bold cursor-pointer hover:bg-slate-300 transition">Batal</button>
+            <button type="submit" id="btnUpdate" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg font-bold flex items-center justify-center transition cursor-pointer">Simpan Perubahan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+    <!-- MODAL POP-UP KALENDER -->
+    <div id="modal-kalender" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 transition-opacity">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div class="bg-indigo-600 p-4 flex justify-between items-center">
+          <h3 class="text-white font-bold text-lg">Detail Kegiatan</h3>
+          <button type="button" onclick="document.getElementById('modal-kalender').classList.add('hidden')" class="text-indigo-200 hover:text-white cursor-pointer">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+        <div class="p-6 space-y-3 text-sm" id="modal-body-kalender"></div>
+        <div class="bg-slate-50 p-4 border-t border-slate-100 text-right">
+          <button type="button" onclick="document.getElementById('modal-kalender').classList.add('hidden')" class="bg-slate-800 text-white px-5 py-2 rounded-lg font-semibold hover:bg-slate-900 cursor-pointer shadow-sm transition">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL POP-UP KONFIRMASI BATAL MANDIRI -->
+    <div id="modal-batal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 transition-opacity">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-100 transition-all">
+        <div class="bg-red-600 p-4 flex justify-between items-center">
+          <h3 class="text-white font-bold text-lg">Konfirmasi Pembatalan</h3>
+          <button type="button" onclick="tutupModalBatal()" class="text-red-200 hover:text-white cursor-pointer">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+        <div class="p-6 space-y-4 text-sm">
+          <div class="text-center bg-red-50 border border-red-100 p-3 rounded-xl mb-2">
+            <p class="text-xs text-red-600 font-semibold uppercase tracking-wide">Agenda yang akan dihapus</p>
+            <h4 id="batal-kegiatan-title" class="text-base font-bold text-slate-800 mt-1"></h4>
+          </div>
+          <div id="batal-detail-body" class="space-y-2"></div>
+          <p class="text-xs text-slate-500 italic mt-4 text-center">Apakah Anda benar-benar yakin ingin membatalkan/menghapus permohonan jadwal di atas?</p>
+        </div>
+        <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex gap-3 justify-end">
+          <button type="button" onclick="tutupModalBatal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2 rounded-lg font-semibold cursor-pointer transition">Tidak, Kembali</button>
+          <button type="button" id="btnConfirmBatal" onclick="eksekusiBatal()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg font-semibold flex items-center justify-center transition cursor-pointer shadow-sm">Ya, Batalkan</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let appData = { ruangan: [], bookings: [] };
+    let calendar = null;
+    let rowToCancel = null; 
+
+    // --- FUNGSI TOAST NOTIFICATION (MENGGANTIKAN ALERT BAWAAN) ---
+    function showToast(message, isSuccess) {
+      const toast = document.getElementById('toast-notif');
+      const content = document.getElementById('toast-content');
+      
+      if(isSuccess) {
+        content.className = "flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl text-sm font-bold bg-emerald-600 text-white w-full";
+        content.innerHTML = `<svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <span>${message}</span>`;
+      } else {
+        content.className = "flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl text-sm font-bold bg-red-600 text-white w-full";
+        content.innerHTML = `<svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> <span>${message}</span>`;
+      }
+      
+      toast.classList.remove('hidden');
+      void toast.offsetWidth; // Memicu reflow browser agar animasi jalan
+      toast.classList.remove('opacity-0', '-translate-y-5');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-5');
+        setTimeout(() => toast.classList.add('hidden'), 300);
+      }, 3500); // Tampil selama 3.5 detik
+    }
+
+    function btnLoading(btnEl, text) {
+      if(!btnEl.dataset.originalText) btnEl.dataset.originalText = btnEl.innerHTML;
+      btnEl.disabled = true;
+      btnEl.innerHTML = `<svg class="animate-spin inline-block -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> ${text}`;
+      btnEl.classList.add('opacity-75', 'cursor-not-allowed');
+    }
+
+    function btnReset(btnEl) {
+      btnEl.disabled = false;
+      if (btnEl.dataset.originalText) btnEl.innerHTML = btnEl.dataset.originalText;
+      btnEl.classList.remove('opacity-75', 'cursor-not-allowed');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setTglMinimal();
+      fetchCoreData();
+    });
+
+    function setTglMinimal() {
+      const today = new Date().toISOString().split('T')[0];
+      document.querySelectorAll('.input-tgl').forEach(el => el.min = today);
+    }
+
+    function tambahJadwal() {
+      const container = document.getElementById('jadwal-container');
+      const firstItem = container.querySelector('.jadwal-item');
+      const clone = firstItem.cloneNode(true);
+      clone.querySelector('input[type="date"]').value = '';
+      clone.querySelectorAll('input[type="time"]').forEach(input => input.value = '');
+      container.appendChild(clone);
+      setTglMinimal(); updateTombolHapus();
+    }
+
+    function hapusJadwal(btn) {
+      btn.closest('.jadwal-item').remove();
+      updateTombolHapus();
+    }
+
+    function updateTombolHapus() {
+      const items = document.querySelectorAll('.jadwal-item');
+      items.forEach((item) => {
+        const btn = item.querySelector('.btn-hapus-jadwal');
+        if(items.length === 1) {
+          btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed');
+          btn.classList.remove('text-red-500', 'hover:bg-red-50', 'cursor-pointer');
+        } else {
+          btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed');
+          btn.classList.add('text-red-500', 'hover:bg-red-50', 'cursor-pointer');
+        }
+      });
+    }
+
+    function fetchCoreData() {
+      google.script.run.withSuccessHandler(data => {
+        appData = data; buildRoomCards(); buildDropdowns(); buildCalendar();
+      }).getSpreadsheetData();
+    }
+
+    function buildRoomCards() {
+      document.getElementById('ruangan-container').innerHTML = appData.ruangan.map(r => `
+        <div class="bg-white rounded-2xl shadow-xs border border-slate-100 p-5">
+          <div class="bg-indigo-50 text-indigo-700 font-semibold px-2 py-1 rounded text-xs inline-block mb-2">Kapasitas: ${r.kapasitas} Org</div>
+          <h3 class="font-bold text-slate-900 mb-1">${r.nama}</h3>
+          <p class="text-xs text-slate-600">Sarpras: ${r.fasilitas}</p>
+        </div>`).join('');
+    }
+
+    function buildDropdowns() {
+      const opts = '<option value="">-- Pilih Tempat --</option>' + appData.ruangan.map(r => `<option value="${r.nama}">${r.nama}</option>`).join('');
+      document.getElementById('form-ruangan-select').innerHTML = opts;
+      document.getElementById('editRuangan').innerHTML = opts;
+    }
+
+    function buildCalendar() {
+      const events = appData.bookings.filter(b => b.status.toLowerCase() === 'disetujui' || b.status.toLowerCase() === 'pending').map(b => ({
+        title: `[${b.ruangan}] ${b.kegiatan}`,
+        start: `${b.tanggal}T${b.jamMulai}:00`, end: `${b.tanggal}T${b.jamSelesai}:00`,
+        color: b.status.toLowerCase() === 'disetujui' ? '#10b981' : '#f59e0b',
+        extendedProps: { ...b }
+      }));
+      if(calendar) calendar.destroy();
+      calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+        locale: 'id',
+        initialView: 'dayGridMonth',
+        headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+        eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+        slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+        events: events,
+        eventClick: (info) => { tampilModalKalender(info.event.extendedProps); }
+      });
+      calendar.render();
+    }
+
+    function tampilModalKalender(p) {
+      const modal = document.getElementById('modal-kalender');
+      const body = document.getElementById('modal-body-kalender');
+      let teksInstansi = (p.instansi === 'Kapanewon Depok') ? `Internal Kapanewon (${p.detailInstansi})` : p.detailInstansi;
+      
+      let badgeStatus = p.status.toLowerCase() === 'disetujui' 
+        ? '<span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-xs font-extrabold uppercase tracking-wide">Disetujui</span>' 
+        : '<span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-md text-xs font-extrabold uppercase tracking-wide">Pending Verifikasi</span>';
+
+      const tglParts = p.tanggal.split('-'); 
+      const formatTglBaku = `${tglParts[2]}-${tglParts[1]}-${tglParts[0]}`; 
+
+      body.innerHTML = `
+        <div class="mb-5 text-center">
+          <h4 class="text-xl font-bold text-slate-800 mb-2">${p.kegiatan}</h4>
+          ${badgeStatus}
+        </div>
+        <div class="grid grid-cols-3 gap-2 border-b border-dashed border-slate-200 pb-2">
+          <span class="text-slate-500 font-medium">Tempat</span>
+          <span class="col-span-2 font-bold text-indigo-700">: ${p.ruangan}</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 border-b border-dashed border-slate-200 pb-2">
+          <span class="text-slate-500 font-medium">Waktu</span>
+          <span class="col-span-2 font-semibold text-slate-800">: ${formatTglBaku} (${p.jamMulai} - ${p.jamSelesai} WIB)</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 border-b border-dashed border-slate-200 pb-2">
+          <span class="text-slate-500 font-medium">Instansi Peminjam</span>
+          <span class="col-span-2 font-semibold text-slate-800">: ${teksInstansi}</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <span class="text-slate-500 font-medium">Penanggung Jawab</span>
+          <span class="col-span-2 font-semibold text-slate-800">: ${p.penanggungJawab}</span>
+        </div>
+      `;
+      modal.classList.remove('hidden');
+    }
+
+    function switchTab(id) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`content-${id}`).classList.remove('hidden');
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.className = "tab-btn px-3 py-2 text-xs font-medium rounded-lg text-indigo-100 hover:text-white whitespace-nowrap cursor-pointer");
+      document.getElementById(`tab-${id}`).className = "tab-btn px-3 py-2 text-xs font-medium rounded-lg bg-white text-indigo-700 shadow-sm whitespace-nowrap cursor-pointer";
+      if(id === 'kalender' && calendar) setTimeout(() => calendar.updateSize(), 50);
+    }
+
+    function toggleInstansi() {
+      const val = document.getElementById('instansi').value;
+      const divInternal = document.getElementById('div-internal');
+      const divLainnya = document.getElementById('div-plainnya');
+      
+      const selectInternal = document.getElementById('internalPengampu');
+      const textLainnya = document.getElementById('instansiLainnya');
+      const fileLainnya = document.getElementById('suratFile');
+
+      if (val === 'Kapanewon Depok') {
+        divInternal.classList.remove('hidden'); divLainnya.classList.add('hidden');
+        selectInternal.required = true; textLainnya.required = false; fileLainnya.required = false;
+        textLainnya.value = ""; fileLainnya.value = "";
+      } else if (val === 'Lainnya') {
+        divInternal.classList.add('hidden'); divLainnya.classList.remove('hidden');
+        selectInternal.required = false; selectInternal.value = "";
+        textLainnya.required = true; fileLainnya.required = true;
+      } else {
+        divInternal.classList.add('hidden'); divLainnya.classList.add('hidden');
+        selectInternal.required = false; textLainnya.required = false; fileLainnya.required = false;
+      }
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const form = document.getElementById('bookingForm');
+      const btn = document.getElementById('submitBtn');
+      const msg = document.getElementById('form-message');
+      const fileInput = document.getElementById('suratFile');
+
+      const selectedRoom = appData.ruangan.find(r => r.nama === form.ruangan.value);
+      if (selectedRoom && parseInt(form.jumlahPeserta.value) > parseInt(selectedRoom.kapasitas)) {
+        msg.classList.remove('hidden');
+        msg.className = 'p-3 rounded-lg text-xs font-medium text-center bg-red-50 text-red-700 border border-red-200';
+        msg.textContent = `Sistem Menolak: Jumlah peserta (${form.jumlahPeserta.value} orang) melebihi batas kapasitas maksimal ${form.ruangan.value} (${selectedRoom.kapasitas} orang).`;
+        msg.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+        return;
+      }
+
+      if (form.instansi.value === 'Lainnya' && fileInput.files.length === 0) {
+        msg.classList.remove('hidden'); msg.className = 'p-3 rounded-lg text-xs font-medium text-center bg-red-50 text-red-700 border border-red-200';
+        msg.textContent = 'Gagal: Instansi Luar WAJIB mengunggah dokumen Surat.';
+        msg.scrollIntoView({ behavior: 'smooth', block: 'center' }); return;
+      }
+
+      const tglInputs = document.querySelectorAll('input[name="tanggal[]"]');
+      const mulaiInputs = document.querySelectorAll('input[name="jamMulai[]"]');
+      const selesaiInputs = document.querySelectorAll('input[name="jamSelesai[]"]');
+      let schedules = [];
+      for(let i = 0; i < tglInputs.length; i++) {
+        schedules.push({ tanggal: tglInputs[i].value, jamMulai: mulaiInputs[i].value, jamSelesai: selesaiInputs[i].value });
+      }
+
+      btnLoading(btn, 'Sistem sedang berproses, mohon tunggu...');
+
+      let payload = {
+        nama: form.nama.value, kontak: form.kontak.value, instansi: form.instansi.value,
+        internalPengampu: document.getElementById('internalPengampu').value,
+        instansiLainnya: form.instansiLainnya.value, ruangan: form.ruangan.value,
+        kegiatan: form.kegiatan.value, jumlahPeserta: form.jumlahPeserta.value,
+        jadwal: schedules
+      };
+
+      if (form.instansi.value === 'Lainnya' && fileInput.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          payload.fileData = evt.target.result; payload.fileName = fileInput.files[0].name;
+          google.script.run.withSuccessHandler(res => handleResponse(res, form, btn, msg)).submitBooking(payload);
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        google.script.run.withSuccessHandler(res => handleResponse(res, form, btn, msg)).submitBooking(payload);
+      }
+    }
+
+    function handleResponse(res, form, btn, msg) {
+      btnReset(btn); 
+      msg.className = res.success ? 'p-3 rounded-lg text-xs font-medium text-center bg-emerald-50 text-emerald-700 border border-emerald-100' : 'p-3 rounded-lg text-xs font-medium text-center bg-amber-50 text-amber-700 border border-amber-200';
+      msg.textContent = res.message; msg.open = true; msg.classList.remove('hidden');
+      if(res.success) { 
+        form.reset(); toggleInstansi(); fetchCoreData(); 
+        const items = document.querySelectorAll('.jadwal-item');
+        for(let i=1; i<items.length; i++) items[i].remove();
+        updateTombolHapus(); setTglMinimal();
+      }
+      msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function lacakStatusJadwal() {
+      const wa = document.getElementById('cariWa').value;
+      const btn = document.getElementById('btnCari');
+      
+      if(wa.length < 10) { return showToast('Masukkan nomor WA yang valid minimal 10 digit.', 'warning'); }
+      btnLoading(btn, 'Mencari...');
+      
+      google.script.run.withSuccessHandler(res => {
+        btnReset(btn);
+        const wadah = document.getElementById('hasil-cari');
+        wadah.innerHTML = '';
+        
+        if(!res || res.length === 0) {
+          wadah.innerHTML = '<div class="text-center p-4 text-sm text-slate-500 bg-slate-50 rounded-lg">Tidak ada jadwal ditemukan untuk nomor WA ini.</div>';
+          return;
+        }
+        
+        let html = '<div class="space-y-4">';
+        res.reverse().forEach(d => {
+          let statusBadge = '';
+          let aksiBtn = '';
+          
+          if (d.status.toLowerCase() === 'disetujui') {
+            statusBadge = '<span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded font-bold border border-emerald-200">Disetujui</span>';
+          } else if (d.status.toLowerCase() === 'ditolak') {
+            statusBadge = '<span class="bg-red-100 text-red-800 text-xs px-2 py-0.5 rounded font-bold border border-red-200">Ditolak</span>';
+            aksiBtn = `<div class="text-xs text-red-600 italic bg-red-50 p-2 rounded w-full text-center">Alasan: ${d.alasan}</div>`;
+          } else if (d.status.toLowerCase() === 'dibatalkan') {
+            statusBadge = '<span class="bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded font-bold border border-slate-300">Dibatalkan (Oleh Anda)</span>';
+          } else {
+            statusBadge = '<span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded font-bold border border-amber-200">Pending Verifikasi</span>';
+            aksiBtn = `
+              <div class="flex gap-1.5 mt-2">
+                <button onclick='bukaFormEdit(${JSON.stringify(d)})' class="bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded text-xs font-bold hover:bg-indigo-200 cursor-pointer transition flex-1 text-center">Edit Jadwal</button>
+                <button onclick='requestPembatalan(${JSON.stringify(d)})' class="bg-red-100 text-red-700 px-3 py-1.5 rounded text-xs font-bold hover:bg-red-200 cursor-pointer transition flex-1 text-center">Batalkan</button>
+              </div>`;
+          }
+          
+          html += `
+            <div class="border border-slate-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition">
+              <div class="flex justify-between items-start mb-3 border-b border-slate-100 pb-2">
+                <div>
+                  <div class="text-xs text-slate-500 font-medium mb-1">ID: ${d.idBooking}</div>
+                  <div class="font-bold text-slate-800 text-base leading-tight">${d.kegiatan}</div>
+                </div>
+                <div>${statusBadge}</div>
+              </div>
+              
+              <div class="space-y-2 text-sm text-slate-600 mb-3">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                  <span class="font-medium">${d.ruangan}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  <span>${d.tanggal} (${d.jamMulai} - ${d.jamSelesai} WIB)</span>
+                </div>
+              </div>
+
+              <div class="mt-2 pt-2 border-t border-slate-100 text-[11px] text-slate-500 flex flex-col gap-1 bg-slate-50 p-2 rounded-lg">
+                <div class="flex justify-between">
+                  <span>Waktu Pengajuan:</span> 
+                  <span class="font-medium text-slate-700">${d.timestampSubmit}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Terakhir Diubah:</span> 
+                  <span class="font-medium text-slate-700">${d.timestampEdit}</span>
+                </div>
+              </div>
+
+              ${aksiBtn ? aksiBtn : ''}
+            </div>
+          `;
+        });
+        html += '</div>';
+        wadah.innerHTML = html;
+        
+      }).cariBookingUser(wa);
+    }
+
+    function requestPembatalan(d) {
+      rowToCancel = d.row;
+      document.getElementById('batal-kegiatan-title').textContent = d.kegiatan;
+      
+      const tglParts = d.tanggal.split('-');
+      const formatTgl = `${tglParts[2]}-${tglParts[1]}-${tglParts[0]}`;
+
+      document.getElementById('batal-detail-body').innerHTML = `
+        <div class="flex justify-between border-b pb-1 text-xs"><span class="text-slate-500">Ruangan:</span><span class="font-bold text-indigo-700">${d.ruangan}</span></div>
+        <div class="flex justify-between border-b pb-1 text-xs"><span class="text-slate-500">Hari/Tanggal:</span><span class="font-semibold text-slate-800">${formatTgl}</span></div>
+        <div class="flex justify-between text-xs"><span class="text-slate-500">Waktu Acara:</span><span class="font-semibold text-slate-800">${d.jamMulai} s.d ${d.jamSelesai} WIB</span></div>
+      `;
+      document.getElementById('modal-batal').classList.remove('hidden');
+    }
+
+    function tutupModalBatal() {
+      document.getElementById('modal-batal').classList.add('hidden');
+      rowToCancel = null;
+    }
+
+    function eksekusiBatal() {
+      if(!rowToCancel) return;
+      const btn = document.getElementById('btnConfirmBatal');
+      
+      btnLoading(btn, 'Membatalkan...');
+      
+      google.script.run.withSuccessHandler(res => {
+        btnReset(btn);
+        tutupModalBatal();
+        
+        // REVISI: Mengganti alert eksekusi batal dengan TOAST NOTIFIKASI
+        showToast(res.message, res.success);
+        
+        if(res.success) {
+          fetchCoreData();
+          lacakStatusJadwal(); 
+        }
+      }).cancelBookingByRow(rowToCancel);
+    }
+
+    function bukaFormEdit(data) {
+      document.getElementById('form-edit-container').classList.remove('hidden');
+      document.getElementById('editRow').value = data.row; document.getElementById('editRuangan').value = data.ruangan;
+      document.getElementById('editKegiatan').value = data.kegiatan; document.getElementById('editTanggal').value = data.tanggal;
+      document.getElementById('editMulai').value = data.jamMulai; document.getElementById('editSelesai').value = data.jamSelesai;
+      document.getElementById('edit-message').classList.add('hidden');
+      document.getElementById('form-edit-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function batalEdit() { document.getElementById('form-edit-container').classList.add('hidden'); }
+
+    function handleEditSubmit(e) {
+      e.preventDefault(); const btn = document.getElementById('btnUpdate'); const msg = document.getElementById('edit-message');
+      
+      btnLoading(btn, 'Menyimpan...');
+
+      const payload = {
+        row: document.getElementById('editRow').value, ruangan: document.getElementById('editRuangan').value,
+        kegiatan: document.getElementById('editKegiatan').value, tanggal: document.getElementById('editTanggal').value,
+        jamMulai: document.getElementById('editMulai').value, jamSelesai: document.getElementById('editSelesai').value
+      };
+
+      google.script.run.withSuccessHandler(res => {
+        btnReset(btn); 
+        msg.classList.remove('hidden');
+        msg.className = res.success ? 'p-2 rounded text-xs text-center bg-emerald-50 text-emerald-700' : 'p-2 rounded text-xs text-center bg-red-50 text-red-700';
+        msg.textContent = res.message;
+        if(res.success) { fetchCoreData(); document.getElementById('hasil-cari').innerHTML = ''; document.getElementById('cariWa').value = ''; setTimeout(batalEdit, 1500); }
+      }).updateBooking(payload);
+    }
+  </script>
+</body>
+</html>
