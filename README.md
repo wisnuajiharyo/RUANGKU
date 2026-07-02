@@ -32,7 +32,7 @@ Setiap perubahan frontend, lakukan clasp push untuk mengunggah perubahan ke serv
 Deploy Deployment
 Buka Script Editor -> Deploy -> New Deployment.
 Pilih Type: Web App.
-Execute as: wisnuajiharyo@gmail.com.
+Execute as: Email Admin.
 Who has access: Anyone.
 
 6. Kontak Dukungan
