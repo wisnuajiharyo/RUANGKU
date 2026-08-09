@@ -554,16 +554,60 @@
     }
 
     function handleResponse(res, form, btn, msg) {
-      btnReset(btn); 
-      msg.className = res.success ? 'p-3 rounded-lg text-xs font-medium text-center bg-emerald-50 text-emerald-700 border border-emerald-100' : 'p-3 rounded-lg text-xs font-medium text-center bg-amber-50 text-amber-700 border border-amber-200';
-      msg.textContent = res.message; msg.open = true; msg.classList.remove('hidden');
-      if(res.success) { 
-        form.reset(); toggleInstansi(); fetchCoreData(); 
+      btnReset(btn);
+
+      msg.className = res.success
+        ? 'p-3 rounded-lg text-xs font-medium text-center bg-emerald-50 text-emerald-700 border border-emerald-100'
+        : 'p-3 rounded-lg text-xs font-medium text-center bg-amber-50 text-amber-700 border border-amber-200';
+
+      if (res.success) {
+        const adminWa = '6285117104040';
+        const waText = encodeURIComponent(
+          'Halo Admin Sekretariat Kapanewon Depok. ' +
+          'Saya telah mengajukan peminjaman melalui RUANGKU dengan ID Pengajuan ' +
+          res.idBooking +
+          '. Mohon konfirmasi pengajuan saya. Terima kasih.'
+        );
+
+        msg.innerHTML = `
+          <div class="space-y-2">
+            <div>✅ ${res.message}</div>
+            <div>ID Pengajuan: <strong>${res.idBooking}</strong></div>
+            <div class="pt-1">
+              Silakan hubungi Admin Sekretariat melalui WhatsApp untuk konfirmasi pengajuan.
+            </div>
+            <a
+              href="https://wa.me/${adminWa}?text=${waText}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-block mt-1 px-3 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition"
+            >
+              💬 Hubungi Admin via WhatsApp
+            </a>
+          </div>
+        `;
+
+        form.reset();
+        toggleInstansi();
+        fetchCoreData();
+
         const items = document.querySelectorAll('.jadwal-item');
-        for(let i=1; i<items.length; i++) items[i].remove();
-        updateTombolHapus(); setTglMinimal();
+        for (let i = 1; i < items.length; i++) items[i].remove();
+
+        updateTombolHapus();
+        setTglMinimal();
+
+      } else {
+        msg.textContent = res.message;
       }
-      msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      msg.open = true;
+      msg.classList.remove('hidden');
+
+      msg.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
     }
 
     function lacakStatusJadwal() {

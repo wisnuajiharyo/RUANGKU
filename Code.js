@@ -158,7 +158,11 @@ function submitBooking(form) {
       ]);
     }
     
-    return { success: true, message: 'Berhasil! ID: ' + idBooking + '.' };
+    return {
+      success: true,
+      idBooking: idBooking,
+      message: 'Pengajuan berhasil dikirim dan menunggu konfirmasi admin.'
+    };
   } catch(e) {
     return { success: false, message: 'Error: ' + e.toString() };
   }
