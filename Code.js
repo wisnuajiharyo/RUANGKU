@@ -1,7 +1,7 @@
 function doGet() {
   return HtmlService.createTemplateFromFile('Index')
       .evaluate()
-      .setTitle('RUANGKU | Sistem Peminjaman Ruangan Kapanewon Depok')
+      .setTitle('SIPINTAR Depok | Sistem Pinjam Tempat & Ruang di Kapanewon Depok')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
       .addMetaTag('viewport', 'width=device-width, initial-scale=1.0');
 }
