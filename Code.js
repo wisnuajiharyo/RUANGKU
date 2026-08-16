@@ -277,7 +277,7 @@ function cancelBookingByRow(rowId) {
 // =================================================================
 function onOpen() {
   var ui = SpreadsheetApp.getUi();
-  ui.createMenu('🖨️ SAMPUR Admin')
+  ui.createMenu('🖨️ SIPINTAR Admin')
       .addItem('Cetak Laporan Bulanan', 'bukaPromptLaporan')
       .addToUi();
 }
